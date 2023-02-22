@@ -1,0 +1,60 @@
+---
+title: "MLRG_logs"
+format: html
+editor: visual
+---
+
+## Load Packages
+```{r}
+
+if (!require(librarian)){
+  install.packages("librarian")
+  library(librarian)
+}
+# librarian downloads, if not already downloaded, and reads in needed packages
+librarian::shelf(tidyverse, here, jsonlite, googledrive, learnitdown, tidyr)
+
+```
+
+## Read in logs from google drive
+```{r}
+#| output: false
+#| echo: false
+
+log_folder <- "https://drive.google.com/drive/folders/1hUEOkqn5yqPbmI_CQyCr5gtdWNG31JEj"
+
+log_folder_id <- drive_get((as_id(log_folder)))
+
+raw_logs <- drive_ls(log_folder_id)
+
+unlink(here("data/*"))
+
+for (i in raw_logs$id) {
+  
+  drive_download(file = as_id(i), path = paste0(here("data"), "/", i, ".json"), overwrite = T)
+  
+}
+
+
+```
+
+## bind files into data frame
+```{r}
+
+files <- list.files(here("data"))
+
+data <- data.frame()
+
+for (i in seq_along(files)){
+
+  temp <- fromJSON(here("data", files[i])) %>% 
+    as.data.frame()
+    
+  data <- rbind(data, temp)
+
+}
+
+a <- read_json(here("data", "1UL-8JBylP_u-xpzYs5DLIr1C9v6YtakO.json"), simplifyVector = T)
+
+```
+
